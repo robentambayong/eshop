@@ -42,9 +42,13 @@ After evaluating the current source code, I identified these areas for future im
 Reflection 2
 ------------
 
-**1a. After writing the unit test, how do you feel? How many unit tests should be made in a class? How to make sure that our unit tests are enough to verify our program?**Writing unit tests provides a significant sense of security, especially after dealing with merge conflicts and compilation errors like the UUID symbol issue. There is no "magic number" for how many tests a class should have. Instead, the focus should be on covering all logical paths, including positive scenarios (creating a valid product) and negative scenarios (searching for a non-existent ID). To ensure tests are "enough," we can use **Code Coverage** metrics.
+**1a. After writing the unit test, how do you feel? How many unit tests should be made in a class? How to make sure that our unit tests are enough to verify our program?**
 
-**1b. If you have 100% code coverage, does that mean your code has no bugs or errors?**No, 100% code coverage does not guarantee bug-free code. It simply means every line of code was executed during a test. It does not account for:
+Writing unit tests provides a significant sense of security, especially after dealing with merge conflicts and compilation errors like the UUID symbol issue. There is no "magic number" for how many tests a class should have. Instead, the focus should be on covering all logical paths, including positive scenarios (creating a valid product) and negative scenarios (searching for a non-existent ID). To ensure tests are "enough," we can use **Code Coverage** metrics.
+
+**1b. If you have 100% code coverage, does that mean your code has no bugs or errors?**
+
+No, 100% code coverage does not guarantee bug-free code. It simply means every line of code was executed during a test. It does not account for:
 
 *   **Logic errors**: The code might run but return the wrong result.
 
