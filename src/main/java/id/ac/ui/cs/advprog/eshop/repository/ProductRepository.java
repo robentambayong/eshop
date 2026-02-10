@@ -12,11 +12,18 @@ public class ProductRepository {
     private List<Product> productData = new ArrayList<>();
 
     public Product create(Product product) {
+        if (product.getProductId() == null) {
+            product.setProductId(java.util.UUID.randomUUID().toString());
+        }
         productData.add(product);
         return product;
     }
 
     public Iterator<Product> findAll() {
         return productData.iterator();
+    }
+
+    public void delete(String id) {
+        productData.removeIf(product -> product.getProductId().equals(id));
     }
 }
