@@ -6,16 +6,17 @@ import org.springframework.stereotype.Repository;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
 
 @Repository
 public class ProductRepository {
     private List<Product> productData = new ArrayList<>();
 
     public Product create(Product product) {
-        // As noted in your reflection, we should ensure every product has a UUID
         if (product.getProductId() == null) {
             product.setProductId(UUID.randomUUID().toString());
+        }
+        if (product.getProductId() == null) {
+            product.setProductId(java.util.UUID.randomUUID().toString());
         }
         productData.add(product);
         return product;
@@ -24,8 +25,6 @@ public class ProductRepository {
     public Iterator<Product> findAll() {
         return productData.iterator();
     }
-
-    // --- Specific to the Edit Feature ---
 
     public Product findById(String id) {
         for (Product product : productData) {
@@ -44,5 +43,9 @@ public class ProductRepository {
             }
         }
         return null;
+    }
+
+    public void delete(String id) {
+        productData.removeIf(product -> product.getProductId().equals(id));
     }
 }
