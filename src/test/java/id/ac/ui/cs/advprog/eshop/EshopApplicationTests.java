@@ -10,4 +10,9 @@ class EshopApplicationTests {
     void contextLoads() {
     }
 
+    @Test
+    void testMain() {
+        // This explicitly calls the main method to provide coverage
+        EshopApplication.main(new String[]{});
+    }
 }

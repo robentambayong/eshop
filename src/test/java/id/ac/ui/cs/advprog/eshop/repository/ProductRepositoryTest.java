@@ -107,4 +107,50 @@ class ProductRepositoryTest {
         Iterator<Product> productIterator = productRepository.findAll();
         assertFalse(productIterator.hasNext());
     }
+    @Test
+    void testFindByIdIfProductDoesNotExist() {
+        Product product = new Product();
+        product.setProductId("123");
+        product.setProductName("Test Product");
+        product.setProductQuantity(100);
+        productRepository.create(product);
+
+        // Try to find an ID that we know is not there
+        Product foundProduct = productRepository.findById("non-existent-id");
+        assertNull(foundProduct);
+    }
+
+    @Test
+    void testFindByIdIfMoreThanOneProduct() {
+        Product product1 = new Product();
+        product1.setProductId("id-1");
+        product1.setProductName("Product 1");
+        productRepository.create(product1);
+
+        Product product2 = new Product();
+        product2.setProductId("id-2");
+        product2.setProductName("Product 2");
+        productRepository.create(product2);
+
+        // Find the second product to ensure the loop actually iterates past the first one
+        Product foundProduct = productRepository.findById("id-2");
+        assertNotNull(foundProduct);
+        assertEquals(product2.getProductId(), foundProduct.getProductId());
+    }
+
+    @Test
+    void testUpdateIfProductDoesNotExist() {
+        Product product1 = new Product();
+        product1.setProductId("id-1");
+        product1.setProductName("Product 1");
+        productRepository.create(product1);
+
+        Product updatedProduct = new Product();
+        updatedProduct.setProductId("non-existent-id");
+        updatedProduct.setProductName("Updated Product");
+
+        // Try to update a product with an ID that doesn't exist
+        Product result = productRepository.update(updatedProduct);
+        assertNull(result);
+    }
 }
