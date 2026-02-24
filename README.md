@@ -1,7 +1,7 @@
 eshop - Advanced Programming
 ============================
 
-Reflection 1
+Reflection 1 (Module 1)
 ------------
 
 ### Clean Code Principles Applied
@@ -39,7 +39,7 @@ After evaluating the current source code, I identified these areas for future im
 *   **Error Handling**: I should replace generic responses with specific exception handling (for example: a custom ProductNotFoundException) to provide better context and robustness when a product cannot be found during future Edit or Delete operations.
 
 
-Reflection 2
+Reflection 2 (Module 1)
 ------------
 
 **1a. After writing the unit test, how do you feel? How many unit tests should be made in a class? How to make sure that our unit tests are enough to verify our program?**
@@ -74,3 +74,20 @@ If I were to create a new functional test suite for the "Product List" count usi
     *   **Base Test Class**: Create an abstract BaseFunctionalTest class that handles the @LocalServerPort and @BeforeEach setup.
 
     *   **Inheritance**: Have both CreateProductFunctionalTest and the new list-count test extend this base class. This centralizes the configuration and keeps the specific test classes focused only on their unique interactions.
+
+Module 2 Reflection
+------------
+
+**1. List the code quality issue(s) that you fixed during the exercise and explain your strategy on fixing them.**
+
+* **Empty Method (contextLoads):** SonarCloud flagged the default `contextLoads()` method in my application tests as a "Critical" code smell because empty methods can indicate missing implementation. My strategy to fix this was to add a nested comment inside the method explaining that it is intentionally empty to verify the Spring context loads successfully.
+
+**2. Look at your CI/CD workflows (GitHub Actions). Do you think the current implementation has met the definition of Continuous Integration and Continuous Deployment? Explain the reasons (minimum 3 sentences)!**
+
+Yes, the current implementation successfully meets the definition of both Continuous Integration (CI) and Continuous Deployment (CD).
+For **Continuous Integration**, I have set up GitHub Actions workflows (`ci.yml` and `sonarcloud.yml`) that automatically run my full test suite and execute SonarCloud code quality analysis every time code is pushed or a pull request is made. This ensures that any new code integrated into the repository is verified to be bug-free, maintains 100% test coverage, and adheres to quality standards before it can be merged.
+For **Continuous Deployment**, I connected my GitHub repository to Koyeb using a pull-based PaaS approach. Whenever code is merged into the `main` branch, Koyeb automatically detects the changes, reads my `Dockerfile`, builds the application image, and deploys the latest version to production without requiring any manual intervention.
+
+
+
+
