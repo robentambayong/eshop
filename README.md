@@ -88,6 +88,38 @@ Yes, the current implementation successfully meets the definition of both Contin
 For **Continuous Integration**, I have set up GitHub Actions workflows (`ci.yml` and `sonarcloud.yml`) that automatically run my full test suite and execute SonarCloud code quality analysis every time code is pushed or a pull request is made. This ensures that any new code integrated into the repository is verified to be bug-free, maintains 100% test coverage, and adheres to quality standards before it can be merged.
 For **Continuous Deployment**, I connected my GitHub repository to Koyeb using a pull-based PaaS approach. Whenever code is merged into the `main` branch, Koyeb automatically detects the changes, reads my `Dockerfile`, builds the application image, and deploys the latest version to production without requiring any manual intervention.
 
+Module 3 Reflection
+------------
+
+**1) Explain what principles you apply to your project!**
+
+In this project, I applied all five of the S.O.L.I.D. principles to refactor the initial codebase:
+
+*   **Single Responsibility Principle (SRP):** I separated the CarController and ProductController into their own files. Previously, both were housed in ProductController.java. Now, each controller is strictly responsible for handling HTTP requests for its own specific entity.
+
+*   **Open-Closed Principle (OCP):** The architecture is designed to be open for extension but closed for modification. By having distinct controllers, services, and repositories for different models, adding a new model (e.g., Motorcycle) simply requires creating new extended classes/interfaces without needing to modify the existing Car or Product files.
+
+*   **Liskov Substitution Principle (LSP):** I removed the extends ProductController inheritance from the CarController. A CarController is not a proper substitute for a ProductController (they handle different domains and views), so inheritance was inappropriate and violated LSP.
+
+*   **Interface Segregation Principle (ISP):** The codebase uses specific interfaces (CarService and ProductService) rather than a single, bloated ItemService interface. This ensures that the controllers only depend on the specific methods they actually need.
+
+*   **Dependency Inversion Principle (DIP):** In the CarController, I changed the injected dependency from the concrete implementation (CarServiceImpl) to the abstraction (CarService). High-level modules now depend on abstractions rather than low-level details.
 
 
+**2) Explain the advantages of applying SOLID principles to your project with examples.**
+
+*   **Easier Maintenance and Readability (SRP):** By splitting ProductController and CarController, the files are shorter and easier to navigate. If there is a bug in the car routing, I know exactly which file to check without scrolling through product logic.
+
+*   **Better Testability and Loose Coupling (DIP & ISP):** Because CarController now depends on the CarService interface rather than CarServiceImpl, I can easily inject a mock CarService when writing unit tests. This isolates the controller logic from the database/repository layer.
+
+*   **Safe Extensibility (OCP):** If the business requirements grow and I need to add new product types, I don't have to touch existing, working code. This vastly reduces the risk of introducing regression bugs into currently stable features.
+
+
+**3) Explain the disadvantages of not applying SOLID principles to your project with examples.**
+
+*   **"God Classes" and Merge Conflicts (Violating SRP):** If I had left CarController inside ProductController.java, the file would eventually become hundreds or thousands of lines long. In a team setting, multiple developers modifying different features in the same file simultaneously would constantly run into difficult merge conflicts.
+
+*   **Fragile and Rigid Code (Violating DIP):** If the CarController explicitly depends on CarServiceImpl, making a change to the constructor or internal workings of the concrete implementation could force me to rewrite parts of the controller. It tightly couples the application layers.
+
+*   **Unexpected Runtime Errors (Violating LSP):** When CarController improperly extended ProductController, calling inherited methods from the product context on a car object could lead to mapping errors, mismatched variables, or unexpected view rendering, making the system highly unpredictable.
 
