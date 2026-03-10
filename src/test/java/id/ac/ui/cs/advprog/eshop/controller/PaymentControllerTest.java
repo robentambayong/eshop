@@ -19,6 +19,7 @@ import java.util.Map;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @WebMvcTest(controllers = PaymentController.class)
 class PaymentControllerTest {
@@ -64,5 +65,30 @@ class PaymentControllerTest {
         mockMvc.perform(get("/payment/detail"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("payment/detailForm"));
+    }
+
+    @Test
+    void testAdminDetailPage() throws Exception {
+        when(paymentService.getPayment("pay-1")).thenReturn(mockPayment);
+        mockMvc.perform(get("/payment/admin/detail/pay-1"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("payment/adminDetail"));
+    }
+
+    @Test
+    void testSetStatusPost() throws Exception {
+        when(paymentService.getPayment("pay-1")).thenReturn(mockPayment);
+        mockMvc.perform(post("/payment/admin/set-status/pay-1")
+                        .param("status", "SUCCESS"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/payment/admin/list"));
+    }
+
+    @Test
+    void testUserDetailPage() throws Exception {
+        when(paymentService.getPayment("pay-1")).thenReturn(mockPayment);
+        mockMvc.perform(get("/payment/detail/pay-1"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("payment/userDetail"));
     }
 }

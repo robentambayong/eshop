@@ -41,13 +41,16 @@ class PaymentServiceImplTest {
         products.add(product);
 
         order = new Order("order-1", products, 123456789L, "Safira");
+
+        // Global stub for repository.save to prevent NullPointerException in all tests
+        lenient().doAnswer(invocation -> invocation.getArgument(0))
+                .when(paymentRepository).save(any(Payment.class));
     }
 
     @Test
     void testAddPaymentVoucherSuccess() {
         Map<String, String> paymentData = new HashMap<>();
         paymentData.put("voucherCode", "ESHOP1234ABC5678");
-        doAnswer(invocation -> invocation.getArgument(0)).when(paymentRepository).save(any(Payment.class));
 
         Payment result = paymentService.addPayment(order, "VOUCHER_CODE", paymentData);
         assertEquals("SUCCESS", result.getStatus());
@@ -57,10 +60,31 @@ class PaymentServiceImplTest {
     @Test
     void testAddPaymentVoucherRejectedInvalidLength() {
         Map<String, String> paymentData = new HashMap<>();
-        paymentData.put("voucherCode", "ESHOP123"); // Too short
-        doAnswer(invocation -> invocation.getArgument(0)).when(paymentRepository).save(any(Payment.class));
-
+        paymentData.put("voucherCode", "ESHOP123");
         Payment result = paymentService.addPayment(order, "VOUCHER_CODE", paymentData);
+        assertEquals("REJECTED", result.getStatus());
+    }
+
+    @Test
+    void testAddPaymentVoucherInvalidNumericCount() {
+        Map<String, String> data = new HashMap<>();
+        data.put("voucherCode", "ESHOP12345678901"); // 16 chars, starts with ESHOP, but wrong digits
+        Payment result = paymentService.addPayment(order, "VOUCHER_CODE", data);
+        assertEquals("REJECTED", result.getStatus());
+    }
+
+    @Test
+    void testAddPaymentVoucherNull() {
+        Map<String, String> data = new HashMap<>();
+        Payment result = paymentService.addPayment(order, "VOUCHER_CODE", data);
+        assertEquals("REJECTED", result.getStatus());
+    }
+
+    @Test
+    void testAddPaymentVoucherWrongPrefix() {
+        Map<String, String> data = new HashMap<>();
+        data.put("voucherCode", "ABCDE1234ABC5678");
+        Payment result = paymentService.addPayment(order, "VOUCHER_CODE", data);
         assertEquals("REJECTED", result.getStatus());
     }
 
@@ -69,7 +93,6 @@ class PaymentServiceImplTest {
         Map<String, String> paymentData = new HashMap<>();
         paymentData.put("bankName", "BCA");
         paymentData.put("referenceCode", "REF123456");
-        doAnswer(invocation -> invocation.getArgument(0)).when(paymentRepository).save(any(Payment.class));
 
         Payment result = paymentService.addPayment(order, "BANK_TRANSFER", paymentData);
         assertEquals("SUCCESS", result.getStatus());
@@ -78,20 +101,39 @@ class PaymentServiceImplTest {
     @Test
     void testAddPaymentBankTransferRejectedEmptyBankName() {
         Map<String, String> paymentData = new HashMap<>();
-        paymentData.put("bankName", ""); // Empty string
+        paymentData.put("bankName", "");
         paymentData.put("referenceCode", "REF123456");
-        doAnswer(invocation -> invocation.getArgument(0)).when(paymentRepository).save(any(Payment.class));
 
         Payment result = paymentService.addPayment(order, "BANK_TRANSFER", paymentData);
         assertEquals("REJECTED", result.getStatus());
     }
 
     @Test
+    void testAddPaymentBankTransferNullFields() {
+        Map<String, String> data = new HashMap<>();
+        Payment result = paymentService.addPayment(order, "BANK_TRANSFER", data);
+        assertEquals("REJECTED", result.getStatus());
+    }
+
+    @Test
+    void testAddPaymentBankTransferEmptySpaces() {
+        Map<String, String> data = new HashMap<>();
+        data.put("bankName", "   ");
+        data.put("referenceCode", "   ");
+        Payment result = paymentService.addPayment(order, "BANK_TRANSFER", data);
+        assertEquals("REJECTED", result.getStatus());
+    }
+
+    @Test
+    void testAddPaymentUnknownMethod() {
+        Payment result = paymentService.addPayment(order, "PAYPAL", new HashMap<>());
+        assertEquals("PENDING", result.getStatus());
+    }
+
+    @Test
     void testSetStatusSuccessUpdatesOrder() {
         Map<String, String> paymentData = new HashMap<>();
         Payment payment = new Payment("payment-1", "VOUCHER_CODE", paymentData, order);
-
-        doAnswer(invocation -> invocation.getArgument(0)).when(paymentRepository).save(any(Payment.class));
 
         Payment result = paymentService.setStatus(payment, "SUCCESS");
         assertEquals("SUCCESS", result.getStatus());
@@ -103,11 +145,16 @@ class PaymentServiceImplTest {
         Map<String, String> paymentData = new HashMap<>();
         Payment payment = new Payment("payment-1", "BANK_TRANSFER", paymentData, order);
 
-        doAnswer(invocation -> invocation.getArgument(0)).when(paymentRepository).save(any(Payment.class));
-
         Payment result = paymentService.setStatus(payment, "REJECTED");
         assertEquals("REJECTED", result.getStatus());
         assertEquals("FAILED", result.getOrder().getStatus());
+    }
+
+    @Test
+    void testSetStatusToPending() {
+        Payment payment = new Payment("pay-1", "VOUCHER_CODE", new HashMap<>(), order);
+        paymentService.setStatus(payment, "PENDING");
+        assertEquals("PENDING", payment.getStatus());
     }
 
     @Test
@@ -126,5 +173,45 @@ class PaymentServiceImplTest {
 
         List<Payment> result = paymentService.getAllPayments();
         assertSame(paymentList, result);
+    }
+
+    @Test
+    void testValidateBankTransferNullBankName() {
+        Map<String, String> data = new HashMap<>();
+        data.put("bankName", null);
+        data.put("referenceCode", "REF123");
+        Payment result = paymentService.addPayment(order, "BANK_TRANSFER", data);
+        assertEquals("REJECTED", result.getStatus());
+    }
+
+    @Test
+    void testValidateBankTransferNullRefCodeOnly() {
+        Map<String, String> data = new HashMap<>();
+        data.put("bankName", "BCA");
+        data.put("referenceCode", null);
+        Payment result = paymentService.addPayment(order, "BANK_TRANSFER", data);
+        assertEquals("REJECTED", result.getStatus());
+    }
+
+    @Test
+    void testValidateBankTransferEmptyRefCode() {
+        Map<String, String> data = new HashMap<>();
+        data.put("bankName", "BCA");
+        data.put("referenceCode", "   ");
+
+        Payment result = paymentService.addPayment(order, "BANK_TRANSFER", data);
+
+        assertEquals("REJECTED", result.getStatus());
+    }
+
+    @Test
+    void testValidateBankTransferNullRefCode() {
+        Map<String, String> data = new HashMap<>();
+        data.put("bankName", "BCA");
+        data.put("referenceCode", null);
+
+        Payment result = paymentService.addPayment(order, "BANK_TRANSFER", data);
+
+        assertEquals("REJECTED", result.getStatus());
     }
 }
