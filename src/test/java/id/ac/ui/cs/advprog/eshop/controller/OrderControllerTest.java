@@ -1,8 +1,9 @@
 package id.ac.ui.cs.advprog.eshop.controller;
 
 import id.ac.ui.cs.advprog.eshop.model.Order;
-import id.ac.ui.cs.advprog.eshop.model.Product; // This was the missing import!
+import id.ac.ui.cs.advprog.eshop.model.Product;
 import id.ac.ui.cs.advprog.eshop.service.OrderService;
+import id.ac.ui.cs.advprog.eshop.service.PaymentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,11 +29,13 @@ class OrderControllerTest {
     @MockBean
     private OrderService orderService;
 
+    @MockBean
+    private PaymentService paymentService;
+
     private Order mockOrder;
 
     @BeforeEach
     void setUp() {
-        // Create a product list with at least one item to satisfy Order validation
         List<Product> products = new ArrayList<>();
         Product product = new Product();
         product.setProductId("eb558e9f-1c39-460e-8860-71af6af63bd6");
@@ -93,6 +96,13 @@ class OrderControllerTest {
 
     @Test
     void testPayOrderPost() throws Exception {
+        when(orderService.findById("order-123")).thenReturn(mockOrder);
+
+        id.ac.ui.cs.advprog.eshop.model.Payment dummyPayment =
+                new id.ac.ui.cs.advprog.eshop.model.Payment("pay-123", "VOUCHER_CODE", new java.util.HashMap<>(), mockOrder);
+
+        when(paymentService.addPayment(any(), any(), any())).thenReturn(dummyPayment);
+
         mockMvc.perform(post("/order/pay/order-123")
                         .param("method", "VOUCHER_CODE")
                         .param("voucherCode", "ESHOP1234ABC5678"))
