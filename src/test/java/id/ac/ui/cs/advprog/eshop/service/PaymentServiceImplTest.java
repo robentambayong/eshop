@@ -91,7 +91,6 @@ class PaymentServiceImplTest {
         Map<String, String> paymentData = new HashMap<>();
         Payment payment = new Payment("payment-1", "VOUCHER_CODE", paymentData, order);
 
-        doReturn(payment).when(paymentRepository).findById("payment-1");
         doAnswer(invocation -> invocation.getArgument(0)).when(paymentRepository).save(any(Payment.class));
 
         Payment result = paymentService.setStatus(payment, "SUCCESS");
@@ -104,7 +103,6 @@ class PaymentServiceImplTest {
         Map<String, String> paymentData = new HashMap<>();
         Payment payment = new Payment("payment-1", "BANK_TRANSFER", paymentData, order);
 
-        doReturn(payment).when(paymentRepository).findById("payment-1");
         doAnswer(invocation -> invocation.getArgument(0)).when(paymentRepository).save(any(Payment.class));
 
         Payment result = paymentService.setStatus(payment, "REJECTED");
