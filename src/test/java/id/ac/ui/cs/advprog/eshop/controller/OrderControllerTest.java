@@ -80,4 +80,24 @@ class OrderControllerTest {
                 .andExpect(model().attributeExists("orders"))
                 .andExpect(model().attribute("author", "Safira"));
     }
+
+    @Test
+    void testPayOrderPage() throws Exception {
+        when(orderService.findById("order-123")).thenReturn(mockOrder);
+
+        mockMvc.perform(get("/order/pay/order-123"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("order/payOrder"))
+                .andExpect(model().attributeExists("order"));
+    }
+
+    @Test
+    void testPayOrderPost() throws Exception {
+        mockMvc.perform(post("/order/pay/order-123")
+                        .param("method", "VOUCHER_CODE")
+                        .param("voucherCode", "ESHOP1234ABC5678"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("order/paymentResult"))
+                .andExpect(model().attributeExists("paymentId"));
+    }
 }
