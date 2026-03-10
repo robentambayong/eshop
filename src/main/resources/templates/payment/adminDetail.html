@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head><title>Admin - Review Payment</title></head>
+<body>
+<h2>Review Payment</h2>
+<p>Payment ID: <span th:text="${payment.id}"></span></p>
+<form th:action="@{/payment/admin/set-status/{id}(id=${payment.id})}" method="post">
+    <button name="status" value="SUCCESS" type="submit">Accept</button>
+    <button name="status" value="REJECTED" type="submit">Reject</button>
+</form>
+</body>
+</html>

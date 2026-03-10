@@ -153,4 +153,12 @@ class ProductRepositoryTest {
         Product result = productRepository.update(updatedProduct);
         assertNull(result);
     }
+
+    @Test
+    void testCreateProductWithNullId() {
+        Product product = new Product();
+        product.setProductName("No ID Product");
+        productRepository.create(product);
+        assertNotNull(product.getProductId()); // This forces the "if (id == null)" branch to run
+    }
 }

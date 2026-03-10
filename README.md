@@ -123,3 +123,35 @@ In this project, I applied all five of the S.O.L.I.D. principles to refactor the
 
 *   **Unexpected Runtime Errors (Violating LSP):** When CarController improperly extended ProductController, calling inherited methods from the product context on a car object could lead to mapping errors, mismatched variables, or unexpected view rendering, making the system highly unpredictable.
 
+Module 4 Reflection
+------------
+
+### Reflection 1: TDD Flow Usefulness
+
+Based on Percival's (2017) self-reflective questions, such as "Does the test help me understand the code?" and "Does the test give me confidence to refactor?", I found this TDD flow to be highly beneficial for the following reasons:
+
+*   **Design Clarity:** Writing the \[RED\] tests first forced me to define the behavior of the Order and Payment models before writing a single line of implementation. This ensured that the code was designed to meet requirements rather than being built haphazardly.
+
+*   **Refactoring Confidence:** During the \[REFACTOR\] stage, where I replaced hardcoded strings with the OrderStatus enum, the existing tests acted as a safety net. If I had accidentally broken the logic during the switch, the tests would have immediately turned red.
+
+*   **Reduced Debugging:** Since I addressed edge cases (like empty product lists or invalid statuses) in the test suite initially, I caught potential bugs during the development phase rather than discovering them during manual testing later.
+
+
+**Next Time:** To improve, I plan to focus on writing even more granular "Unhappy Path" tests. While I covered basic invalid inputs, I could explore more complex scenarios, such as null objects or boundary values for timestamps, to ensure even higher code resilience.
+
+### Reflection 2: F.I.R.S.T. Principle Assessment
+
+I have evaluated the unit tests created in the tutorial against the F.I.R.S.T. principles:
+
+*   **Fast:** The tests run almost instantaneously because they rely on in-memory data structures and Mockito mocks rather than external databases or network calls.
+
+*   **Independent:** Each test in OrderServiceImplTest and OrderRepositoryTest is isolated. Using @BeforeEach to set up fresh objects ensures that the outcome of one test does not depend on the state left by another.
+
+*   **Repeatable:** The tests are deterministic. Whether I run them on my local machine or in a CI/CD pipeline, they yield the same results because they do not rely on external environmental factors like current system time (which we mocked or passed as a fixed value).
+
+*   **Self-Validating:** Each test uses clear assertions (assertEquals, assertThrows, assertNull). There is no need for manual log inspection; the test runner clearly indicates a "Pass" or "Fail" based on these assertions.
+
+*   **Thorough/Timely:** The tests were written "Timely" (before the production code) following the TDD cycle. They are "Thorough" because they cover both "Happy Paths" (successful creation/update) and "Unhappy Paths" (invalid IDs, duplicate orders, invalid statuses).
+
+
+**Conclusion:** My tests successfully follow the F.I.R.S.T. principles. In future modules, I will continue to apply these principles, specifically ensuring that any new features involving external APIs remain **Independent** and **Fast** by using appropriate test doubles.
