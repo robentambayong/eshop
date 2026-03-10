@@ -1,6 +1,7 @@
 package id.ac.ui.cs.advprog.eshop.controller;
 
 import id.ac.ui.cs.advprog.eshop.model.Order;
+import id.ac.ui.cs.advprog.eshop.model.Product; // This was the missing import!
 import id.ac.ui.cs.advprog.eshop.service.OrderService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,7 +32,15 @@ class OrderControllerTest {
 
     @BeforeEach
     void setUp() {
-        mockOrder = new Order("order-123", new ArrayList<>(), 123456789L, "Safira");
+        // Create a product list with at least one item to satisfy Order validation
+        List<Product> products = new ArrayList<>();
+        Product product = new Product();
+        product.setProductId("eb558e9f-1c39-460e-8860-71af6af63bd6");
+        product.setProductName("Sampo Cap Bambang");
+        product.setProductQuantity(2);
+        products.add(product);
+
+        mockOrder = new Order("order-123", products, 123456789L, "Safira");
     }
 
     @Test
