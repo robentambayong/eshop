@@ -21,30 +21,30 @@ public class PaymentServiceImpl implements PaymentService {
         Payment payment = new Payment(UUID.randomUUID().toString(), method, paymentData, order);
 
         if ("VOUCHER_CODE".equals(method)) {
-            String voucher = paymentData.get("voucherCode");
-            boolean isValid = false;
-            if (voucher != null && voucher.length() == 16 && voucher.startsWith("ESHOP")) {
-                int numericCount = 0;
-                for (char c : voucher.toCharArray()) {
-                    if (Character.isDigit(c)) numericCount++;
-                }
-                if (numericCount == 8) {
-                    isValid = true;
-                }
-            }
-            payment.setStatus(isValid ? "SUCCESS" : "REJECTED");
-
+            payment.setStatus(validateVoucher(paymentData) ? "SUCCESS" : "REJECTED");
         } else if ("BANK_TRANSFER".equals(method)) {
-            String bankName = paymentData.get("bankName");
-            String refCode = paymentData.get("referenceCode");
-
-            boolean isValid = bankName != null && !bankName.trim().isEmpty() &&
-                    refCode != null && !refCode.trim().isEmpty();
-
-            payment.setStatus(isValid ? "SUCCESS" : "REJECTED");
+            payment.setStatus(validateBankTransfer(paymentData) ? "SUCCESS" : "REJECTED");
         }
 
         return paymentRepository.save(payment);
+    }
+
+    private boolean validateVoucher(Map<String, String> paymentData) {
+        String voucher = paymentData.get("voucherCode");
+        if (voucher == null || voucher.length() != 16 || !voucher.startsWith("ESHOP")) {
+            return false;
+        }
+
+        long numericCount = voucher.chars().filter(Character::isDigit).count();
+        return numericCount == 8;
+    }
+
+    private boolean validateBankTransfer(Map<String, String> paymentData) {
+        String bankName = paymentData.get("bankName");
+        String refCode = paymentData.get("referenceCode");
+
+        return bankName != null && !bankName.trim().isEmpty() &&
+                refCode != null && !refCode.trim().isEmpty();
     }
 
     @Override
